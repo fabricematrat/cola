@@ -50,7 +50,6 @@ define(function(require) {
 		_listen: function() {
 			var self = this;
 			return when.promise(function(resolve) {
-
 				var socket = self._socket = new WebSocket(self._url);
 				socket.addEventListener('message', function(message) {
 					message = JSON.parse(message.data);
@@ -63,8 +62,14 @@ define(function(require) {
 					} else if(self._shadow && message.patch && message.patch.length > 0) {
 						self._patch(message.patch);
 						console.log('patch', message.patch, self._shadow);
-
 					}
+				});
+
+
+				socket.addEventListener('open', function(){
+
+// mathsync lib client
+console.log("being called ");
 
 				});
 
@@ -73,6 +78,10 @@ define(function(require) {
 
 		_send: function(patch) {
 			this._socket.send(JSON.stringify({ patch: patch }));
+		},
+
+		_stopListen: function() {
+			this._socket.close();
 		}
 	};
 

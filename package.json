@@ -43,7 +43,10 @@
   "devDependencies": {
     "buster": "~0.6",
     "jshint": "~2",
-    "gent": "~0.4"
+    "buster": "~0.6",
+    "gent": "~0.4",
+    "ws": "~0.4",
+    "express": "2.x"  
   },
   "main": "./cola",
   "directories": {

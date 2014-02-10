@@ -9,7 +9,14 @@ var todos = new Memory([]);
 var clientId = 1;
 var clients = {};
 
-var server = new WebSocketServer({port: 8080});
+var http = require('http');
+var express = require('express');
+
+var app = express.createServer();
+
+app.use(express.static(__dirname));
+app.listen(8080);
+var server = new WebSocketServer({server: app});
 
 server.on('connection', function(ws) {
 	var id = clientId++;
