@@ -30,6 +30,8 @@
     <section data-path="todos">
         <button data-on-click="todos@controller.completeAll">Complete All</button>
         <button data-on-click="todos@controller.removeCompleted">Remove Completed</button>
+        <button data-on-click="todos@model._stopListen">Close Connection</button>
+        <button data-on-click="todos@model._listen">Reconnect</button>
         <ul>
             <li data-list>
                 <input type="checkbox" name="complete"/>

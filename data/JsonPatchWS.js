@@ -14,10 +14,13 @@ define(function(require) {
 	var when = require('when');
 	var jsonPatch = require('../lib/jsonPatch');
 	var path = require('../lib/path');
+	var MathDiff = require('./MathDiff');
 
-	function JsonPatchWS(url) {
+	function JsonPatchWS(url, serialize, deserialize, equals) {
 		this._url = url;
+		this._mathDiff = new MathDiff(url, serialize, deserialize, equals);
 	}
+
 
 	JsonPatchWS.prototype = {
 		get: function(path) {
@@ -53,26 +56,19 @@ define(function(require) {
 				var socket = self._socket = new WebSocket(self._url);
 				socket.addEventListener('message', function(message) {
 					message = JSON.parse(message.data);
-
+					
 					if(message.data) {
-						console.log('set data', self._shadow);
-						self._shadow = message.data;
-						resolve(jsonPatch.snapshot(self._shadow));
-
+						if(message.data == 'sync') {
+							self._mathDiff.sync(self, jsonPatch, resolve);
+						} else {
+							self._shadow = message.data;
+							resolve(jsonPatch.snapshot(self._shadow));
+						}
 					} else if(self._shadow && message.patch && message.patch.length > 0) {
 						self._patch(message.patch);
 						console.log('patch', message.patch, self._shadow);
 					}
 				});
-
-
-				socket.addEventListener('open', function(){
-
-// mathsync lib client
-console.log("being called ");
-
-				});
-
 			});
 		},
 

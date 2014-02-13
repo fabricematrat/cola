@@ -18,6 +18,8 @@ app.use(express.static(__dirname));
 app.listen(8080);
 var server = new WebSocketServer({server: app});
 
+var wholeSaleTransfer = false;
+
 server.on('connection', function(ws) {
 	var id = clientId++;
 	var client = clients[id] = new ClientProxy(ws, id);
@@ -59,6 +61,23 @@ server.on('connection', function(ws) {
 	});
 });
 
+function serialize(item) {
+  var buffer = new Buffer(item.complete + ':' + item.description, 'utf-8');
+  return new Uint8Array(buffer).buffer;
+}
+
+var summarizer = require('mathsync').summarizer.fromItems(todos.get() || [], serialize);
+
+app.get('/summary', function(req,res) {
+	var level = req.query.level;
+	console.log(level);
+	summarizer(level | 0).then(function(diff) {
+		//console.log(diff);
+		res.send(diff);
+	});
+});
+
+
 function ClientProxy(client, id) {
 	this.client = client;
 	this.id = id;
@@ -67,7 +86,11 @@ function ClientProxy(client, id) {
 ClientProxy.prototype = {
 	set: function(data) {
 		this._shadow = jsonPatch.snapshot(data);
-		this.client.send(JSON.stringify({ data: data }));
+		if(wholeSaleTransfer) {
+			this.client.send(JSON.stringify({ data: data }));
+		} else {
+			this.client.send(JSON.stringify({ data: 'sync' }));
+		}
 	},
 
 	diff: function(data) {
